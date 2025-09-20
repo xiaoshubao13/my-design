@@ -1,10 +1,293 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>最简单页面</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub PDF 查看器</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            color: #333;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(90deg, #2c3e50, #4ca1af);
+            color: white;
+            padding: 25px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .description {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .main-content {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .input-section {
+            background-color: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .input-group {
+            display: flex;
+            margin-top: 15px;
+        }
+        
+        input {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px 0 0 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+        
+        input:focus {
+            border-color: #4ca1af;
+        }
+        
+        button {
+            background: linear-gradient(90deg, #4ca1af, #2c3e50);
+            color: white;
+            border: none;
+            padding: 0 25px;
+            border-radius: 0 8px 8px 0;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+        
+        .pdf-viewer {
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            height: 600px;
+        }
+        
+        .viewer-header {
+            background: linear-gradient(90deg, #2c3e50, #4ca1af);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .viewer-actions button {
+            border-radius: 5px;
+            padding: 8px 15px;
+            margin-left: 10px;
+            font-size: 14px;
+        }
+        
+        .pdf-container {
+            flex: 1;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            overflow-y: auto;
+        }
+        
+        .pdf-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 5px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .instructions {
+            background-color: #e8f4f8;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #4ca1af;
+        }
+        
+        .instructions h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .instructions ol {
+            margin-left: 20px;
+            line-height: 1.6;
+        }
+        
+        .instructions li {
+            margin-bottom: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #6c757d;
+            font-size: 0.9rem;
+            border-top: 1px solid #eee;
+        }
+        
+        @media (max-width: 768px) {
+            .input-group {
+                flex-direction: column;
+            }
+            
+            input, button {
+                width: 100%;
+                border-radius: 8px;
+                margin-bottom: 10px;
+            }
+            
+            .pdf-viewer {
+                height: 400px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Hello World</h1>
-    <p>这是我的第一个网页。</p>
+    <div class="container">
+        <header>
+            <h1>GitHub PDF 查看器</h1>
+            <p class="description">直接在浏览器中查看托管在GitHub上的PDF文件，无需下载</p>
+        </header>
+        
+        <div class="main-content">
+            <div class="input-section">
+                <h2>输入GitHub PDF文件链接</h2>
+                <div class="input-group">
+                    <input type="text" id="pdf-url" placeholder="例如：https://github.com/username/repo/raw/main/document.pdf">
+                    <button id="load-pdf">加载PDF</button>
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <h3>使用说明：</h3>
+                <ol>
+                    <li>在GitHub上找到您的PDF文件，点击"Raw"或"Download"按钮</li>
+                    <li>复制浏览器中的URL地址（应以.pdf结尾）</li>
+                    <li>将URL粘贴到上面的输入框中，然后点击"加载PDF"</li>
+                    <li>您也可以直接修改此HTML文件中的默认PDF链接</li>
+                </ol>
+            </div>
+            
+            <div class="pdf-viewer">
+                <div class="viewer-header">
+                    <h3>PDF 查看器</h3>
+                    <div class="viewer-actions">
+                        <button id="zoom-in">放大</button>
+                        <button id="zoom-out">缩小</button>
+                    </div>
+                </div>
+                <div class="pdf-container">
+                    <iframe id="pdf-frame" class="pdf-frame" src=""></iframe>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 GitHub PDF Viewer | 通过浏览器直接查看GitHub上的PDF文件</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const pdfUrlInput = document.getElementById('pdf-url');
+            const loadPdfButton = document.getElementById('load-pdf');
+            const pdfFrame = document.getElementById('pdf-frame');
+            const zoomInButton = document.getElementById('zoom-in');
+            const zoomOutButton = document.getElementById('zoom-out');
+            
+            // 设置默认PDF URL（用户可以修改）
+            pdfUrlInput.value = 'https://github.com/mozilla/pdf.js/raw/master/web/compressed.tracemonkey-pldi-09.pdf';
+            
+            // 加载PDF函数
+            function loadPdf() {
+                const pdfUrl = pdfUrlInput.value.trim();
+                if (pdfUrl) {
+                    // 确保URL指向原始文件（针对GitHub）
+                    let processedUrl = pdfUrl;
+                    if (pdfUrl.includes('github.com') && !pdfUrl.includes('raw')) {
+                        processedUrl = pdfUrl.replace('github.com', 'raw.githubusercontent.com').replace('/blob/', '/');
+                    }
+                    
+                    // 使用Google Docs查看器在线显示PDF
+                    pdfFrame.src = `https://docs.google.com/gview?url=${encodeURIComponent(processedUrl)}&embedded=true`;
+                } else {
+                    alert('请输入有效的PDF URL');
+                }
+            }
+            
+            // 初始加载一个示例PDF
+            loadPdf();
+            
+            // 事件监听器
+            loadPdfButton.addEventListener('click', loadPdf);
+            
+            pdfUrlInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    loadPdf();
+                }
+            });
+            
+            // 简单的缩放控制
+            let currentScale = 1;
+            
+            zoomInButton.addEventListener('click', function() {
+                currentScale += 0.25;
+                pdfFrame.style.transform = `scale(${currentScale})`;
+                pdfFrame.style.transformOrigin = 'top center';
+            });
+            
+            zoomOutButton.addEventListener('click', function() {
+                if (currentScale > 0.5) {
+                    currentScale -= 0.25;
+                    pdfFrame.style.transform = `scale(${currentScale})`;
+                    pdfFrame.style.transformOrigin = 'top center';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
